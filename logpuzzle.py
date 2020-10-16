@@ -26,8 +26,21 @@ def read_urls(filename):
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    pass
+    puzzle_urls = []
+    pth = "http://" + "".join(filename.replace('animal_', ""))
+    print(pth)
+    
+    with open(filename, 'r') as f:
+        for position in f:
+            url_result = re.findall(r'GET (\S+) HTTP', position)
+            for match in url_result:
+                if match not in puzzle_urls and 'puzzle' in match:
+                    puzzle_urls.append(match)
+    
+    puzzle_urls.sort(key=lambda x: x[-9:-4])
+    puzzle_urls = list(map(lambda tag: pth + tag, puzzle_urls))
+    print(puzzle_urls)
+    return puzzle_urls
 
 
 def download_images(img_urls, dest_dir):
@@ -38,8 +51,18 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    # start to write out the new index.html
+    index_html = '<html> \n <body> \n'
+
+    for url in img_urls:
+        img_dest = dest_dir + '/img' + str(img_urls.index(url))
+        download_images(url, img_dest)
+        index_html += '<img src="../' + img_dest + '"/>'
+
+    index_html += '\n</body> \n </html>'
+
+    with open(dest_dir + "/index.html", "w") as index_html_file:
+        index_html_file.write(index_html)
 
 
 def create_parser():
