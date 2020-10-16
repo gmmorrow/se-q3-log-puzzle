@@ -52,17 +52,24 @@ def download_images(img_urls, dest_dir):
     Creates the directory if necessary.
     """
     # start to write out the new index.html
-    index_html = '<html> \n <body> \n'
+    if not (os.path.isdir(dest_dir)):
+        os.makedirs(dest_dir)
+    downloads = []
+    with open("index.html", "w") as index:
+        index.write('<html><body>')
+    for i, url in enumerate(img_urls):
+        img_name="img" + str(i) + '.jpeg'
+        img_link=os.path.join(dest_dir, img_name)
+        print("Retrieving" + img_name + "...")
+        urllib.request.urlretrieve(url, img_link)
+        downloads.append(img_name)
+    index=open(os.path.join(dest_dir, 'index.html'), 'w+')
+    index.write('<html>\n<body>\n')
+    for url in downloads:
+        index.write(f'<img src={url}>')
+    index.write("\n</body>\n<html>")
+    index.close()
 
-    for url in img_urls:
-        img_dest = dest_dir + '/img' + str(img_urls.index(url))
-        download_images(url, img_dest)
-        index_html += '<img src="../' + img_dest + '"/>'
-
-    index_html += '\n</body> \n </html>'
-
-    with open(dest_dir + "/index.html", "w") as index_html_file:
-        index_html_file.write(index_html)
 
 
 def create_parser():
