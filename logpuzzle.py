@@ -13,7 +13,7 @@ Here's what a puzzle URL looks like (spread out onto multiple lines):
 HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US;
 rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 """
-
+__author__= """Gabrielle, Jazmyne, John"""
 import os
 import re
 import sys
@@ -29,15 +29,15 @@ def read_urls(filename):
     puzzle_urls = []
     pth = "http://" + "".join(filename.replace('animal_', ""))
     print(pth)
-    
+    # with statement
     with open(filename, 'r') as f:
         for position in f:
-            url_result = re.findall(r'GET (\S+) HTTP', position)
+            url_result = re.findall(r'GET (\S+) HTTP', position) #reg-ex
             for match in url_result:
                 if match not in puzzle_urls and 'puzzle' in match:
                     puzzle_urls.append(match)
     
-    puzzle_urls.sort(key=lambda x: x[-9:-4])
+    puzzle_urls.sort(key=lambda x: x[-8:-4])
     puzzle_urls = list(map(lambda tag: pth + tag, puzzle_urls))
     print(puzzle_urls)
     return puzzle_urls
@@ -68,8 +68,6 @@ def download_images(img_urls, dest_dir):
     for url in downloads:
         index.write(f'<img src={url}>')
     index.write("\n</body>\n<html>")
-    index.close()
-
 
 
 def create_parser():
