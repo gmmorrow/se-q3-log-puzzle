@@ -13,12 +13,13 @@ Here's what a puzzle URL looks like (spread out onto multiple lines):
 HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US;
 rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 """
-__author__= """Gabrielle, Jazmyne, John"""
+__author__= """Gabrielle, Jazmyne, John, stackoverflow"""
 import os
 import re
 import sys
 import urllib.request
 import argparse
+import shutil
 
 
 def read_urls(filename):
@@ -27,20 +28,24 @@ def read_urls(filename):
     alphabetically in increasing order, and screening out duplicates.
     """
     puzzle_urls = []
-    pth = "http://" + "".join(filename.replace('animal_', ""))
-    print(pth)
+    host = filename[re.search(r"_(.*?)", filename).span()[1]:]
+
     # with statement
     with open(filename, 'r') as f:
         for position in f:
-            url_result = re.findall(r'GET (\S+) HTTP', position) #reg-ex
+            url_result = re.findall(r'GET \S+ HTTP', position) #reg-ex
             for match in url_result:
-                if match not in puzzle_urls and 'puzzle' in match:
-                    puzzle_urls.append(match)
+                if match[5:-5] not in puzzle_urls and 'puzzle' in match:
+                    puzzle_urls.append(match[5:-5])
     
     puzzle_urls.sort(key=lambda x: x[-8:-4])
-    puzzle_urls = list(map(lambda tag: pth + tag, puzzle_urls))
+    puzzle_urls = list(map(lambda each: "http://"+host + "/" + each, puzzle_urls))
     print(puzzle_urls)
     return puzzle_urls
+
+
+def sizings():
+    return shutil.get_terminal_size().columns
 
 
 def download_images(img_urls, dest_dir):
@@ -52,22 +57,27 @@ def download_images(img_urls, dest_dir):
     Creates the directory if necessary.
     """
     # start to write out the new index.html
-    if not (os.path.isdir(dest_dir)):
+    if not os.path.isdir(dest_dir):
         os.makedirs(dest_dir)
     downloads = []
-    with open("index.html", "w") as index:
-        index.write('<html><body>')
-    for i, url in enumerate(img_urls):
-        img_name="img" + str(i) + '.jpeg'
-        img_link=os.path.join(dest_dir, img_name)
-        print("Retrieving" + img_name + "...")
-        urllib.request.urlretrieve(url, img_link)
-        downloads.append(img_name)
-    index=open(os.path.join(dest_dir, 'index.html'), 'w+')
-    index.write('<html>\n<body>\n')
-    for url in downloads:
-        index.write(f'<img src={url}>')
+    for i, each in enumerate(img_urls):
+        print(f"Downloading image {i+1} of {len(img_urls)}")
+        img_name = dest_dir + "/img" + str(i) + each[-4:]
+        urllib.request.urlretrieve(each, img_name)
+        downloads.append("img" + str(i) + each[-4:])
+    with open(dest_dir + "/index.html", 'w') as index:
+        index.write('<html><body>\n')
+        for url in downloads:
+            index.write(f'<img src={url}>')
     index.write("\n</body>\n<html>")
+    print("Retrieving" + img_name + "...")
+    int = sizings()
+    print("/" * int)
+    print(f"check out {dest_dir} and open index.html in chrome to see the image".center(int))
+    print("/" * int)
+        # img_link=os.path.join(dest_dir, img_name)
+        # urllib.request.urlretrieve(url, img_link)
+    # index=open(os.path.join(dest_dir, 'index.html'), 'w+')
 
 
 def create_parser():
